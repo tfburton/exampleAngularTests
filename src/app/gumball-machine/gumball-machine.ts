@@ -10,6 +10,7 @@ export class GumballMachine {
 
     public vendGumball(): Gumball {
         if (this.currentTotalValue >= 25) {
+            this.currentTotalValue -= 25;
             return new Gumball();
         }
     }

@@ -3,7 +3,7 @@ import { Quarter } from '../coins/quarter';
 import { Coin } from '../coins/coin';
 import { Mock } from 'typemoq';
 import { mock, when, instance } from 'ts-mockito';
-import { Substitute, Arg } from '@fluffy-spoon/substitute';
+import { Substitute } from '@fluffy-spoon/substitute';
 import { Dime } from '../coins/dime';
 import { Chance } from 'chance';
 const chance = new Chance();
@@ -109,6 +109,16 @@ describe('GumballMachine', () => {
                     const actual = classUnderTest.vendGumball();
 
                     expect(actual).toBeDefined();
+                });
+
+                it('should subtract from the totalValue', () => {
+                    classUnderTest.acceptCoin(new Quarter());
+                    classUnderTest.acceptCoin(new Quarter());
+                    expect(classUnderTest.displayCurrentValue()).toBe('$0.75'); // assertion as part of arrangement
+
+                    classUnderTest.vendGumball();
+
+                    expect(classUnderTest.displayCurrentValue()).toBe('$0.50');
                 });
             });
 
