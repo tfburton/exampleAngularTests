@@ -5,6 +5,8 @@ import { Mock } from 'typemoq';
 import { mock, when, instance } from 'ts-mockito';
 import { Substitute, Arg } from '@fluffy-spoon/substitute';
 import { Dime } from '../coins/dime';
+import { Chance } from 'chance';
+const chance = new Chance();
 
 describe('GumballMachine', () => {
     let classUnderTest: GumballMachine;
@@ -63,6 +65,20 @@ describe('GumballMachine', () => {
             });
         });
 
+        describe('randomizing values', () => {
+            it('should accept coinage', () => {
+                const coin = Substitute.for<Coin>();
+                const coinValue = chance.integer({ max: 99, min: 1 });
+                coin.value.returns(coinValue);
+                classUnderTest.acceptCoin(coin);
+
+                const asCents = coinValue / 100;
+                const withDecimal = asCents.toFixed(2);
+                const expected = `$${withDecimal}`;
+                expect(classUnderTest.displayCurrentValue()).toBe(expected);
+            });
+        });
+
         describe('anti-patterns', () => {
             describe('mocking our unit', () => {
                 it('should accept coinage', () => {
@@ -82,5 +98,51 @@ describe('GumballMachine', () => {
                 });
             });
         });
+
+        describe('Vending', () => {
+            describe('given exactly 25 cents of value', () => {
+                beforeEach(() => {
+                    classUnderTest.acceptCoin(new Quarter());
+                });
+
+                it('should dispense a gumball', () => {
+                    const actual = classUnderTest.vendGumball();
+
+                    expect(actual).toBeDefined();
+                });
+            });
+
+            describe('given more than 25 cents of value', () => {
+                let value: number;
+
+                beforeEach(() => {
+                    value = chance.integer({ min: 26 });
+                    classUnderTest.acceptCoin({ value });
+                });
+
+                it('should dispense a gumball', () => {
+                    const actual = classUnderTest.vendGumball();
+
+                    expect(actual).toBeDefined();
+                });
+            });
+
+            describe('given less than 25 cents of value', () => {
+                let value: number;
+
+                beforeEach(() => {
+                    value = chance.integer({ max: 24, min: 0 });
+                    classUnderTest.acceptCoin({ value });
+                });
+
+                it('should dispense a gumball', () => {
+                    const actual = classUnderTest.vendGumball();
+
+                    expect(actual).toBeUndefined();
+                });
+            });
+        });
     });
 });
+
+describe('FIX THE BUG', () => { });
